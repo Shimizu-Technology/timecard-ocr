@@ -1,5 +1,5 @@
 class PunchEntrySerializer < ActiveModel::Serializer
-  attributes :id, :timecard_id, :date, :time_in, :time_out, :break_start, :break_end, :hours_worked, :confidence_score, :manually_edited, :created_at, :updated_at
-
-  belongs_to :timecard
+  attributes :id, :timecard_id, :date, :day_of_week,
+             :clock_in, :clock_out, :lunch_out, :lunch_in,
+             :hours_worked, :confidence, :manually_edited, :notes
 end

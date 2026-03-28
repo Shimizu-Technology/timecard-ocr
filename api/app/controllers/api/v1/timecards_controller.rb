@@ -1,53 +1,32 @@
 module Api
   module V1
     class TimecardsController < ApplicationController
-      before_action :set_timecard, only: [:show, :update, :destroy]
-
-      # GET /api/v1/timecards
       def index
-        @timecards = Timecard.all
-        render json: @timecards
+        timecards = Timecard.all
+        timecards = timecards.where(ocr_status: params[:status]) if params[:status]
+        render json: timecards, each_serializer: TimecardSerializer
       end
 
-      # GET /api/v1/timecards/:id
       def show
-        render json: @timecard
+        timecard = Timecard.find(params[:id])
+        render json: timecard, serializer: TimecardSerializer
       end
 
-      # POST /api/v1/timecards
       def create
-        @timecard = Timecard.new(timecard_params)
+        file = params[:image]
+        return render json: { error: 'No image provided' }, status: :unprocessable_entity unless file
 
-        if @timecard.save
-          render json: @timecard, status: :created
-        else
-          render json: { errors: @timecard.errors }, status: :unprocessable_entity
-        end
-      end
+        key = "timecards/#{SecureRandom.uuid}/#{file.original_filename}"
+        image_url = S3Service.upload(file.tempfile.path, key)
 
-      # PATCH/PUT /api/v1/timecards/:id
-      def update
-        if @timecard.update(timecard_params)
-          render json: @timecard
-        else
-          render json: { errors: @timecard.errors }, status: :unprocessable_entity
-        end
-      end
+        image_hash = Digest::SHA256.hexdigest(File.read(file.tempfile.path))
+        existing = Timecard.find_by(image_hash: image_hash)
+        return render json: existing, serializer: TimecardSerializer if existing
 
-      # DELETE /api/v1/timecards/:id
-      def destroy
-        @timecard.destroy
-        head :no_content
-      end
+        timecard = Timecard.create!(image_url: image_url, image_hash: image_hash, ocr_status: :pending)
+        ProcessTimecardJob.perform_later(timecard.id)
 
-      private
-
-      def set_timecard
-        @timecard = Timecard.find(params[:id])
-      end
-
-      def timecard_params
-        params.require(:timecard).permit(:employee_name, :period_start, :period_end, :image_url, :ocr_status)
+        render json: timecard, serializer: TimecardSerializer, status: :accepted
       end
     end
   end

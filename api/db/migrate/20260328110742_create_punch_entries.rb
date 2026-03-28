@@ -1,15 +1,17 @@
 class CreatePunchEntries < ActiveRecord::Migration[8.1]
   def change
-    create_table :punch_entries do |t|
-      t.references :timecard, null: false, foreign_key: true
+    create_table :punch_entries, id: :uuid do |t|
+      t.references :timecard, null: false, foreign_key: true, type: :uuid
       t.date :date
-      t.time :time_in
-      t.time :time_out
-      t.time :break_start
-      t.time :break_end
-      t.decimal :hours_worked, precision: 5, scale: 2
-      t.decimal :confidence_score, precision: 3, scale: 2
+      t.string :day_of_week, limit: 3
+      t.time :clock_in
+      t.time :lunch_out
+      t.time :lunch_in
+      t.time :clock_out
+      t.float :hours_worked
+      t.float :confidence
       t.boolean :manually_edited, default: false
+      t.text :notes
 
       t.timestamps
     end

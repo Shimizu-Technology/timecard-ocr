@@ -1,6 +1,5 @@
 class Timecard < ApplicationRecord
   has_many :punch_entries, dependent: :destroy
-
-  validates :employee_name, :period_start, :period_end, presence: true
-  validates :ocr_status, inclusion: { in: %w[pending processing complete failed] }
+  enum :ocr_status, { pending: 0, processing: 1, complete: 2, failed: 3 }
+  validates :image_hash, uniqueness: true, allow_nil: true
 end

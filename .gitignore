@@ -1,0 +1,28 @@
+# Rails
+api/log/*
+api/tmp/*
+api/storage/*
+api/.bundle
+api/vendor/bundle
+api/db/*.sqlite3
+api/db/*.sqlite3-*
+
+# Node / React
+web/node_modules/
+web/dist/
+web/.env
+web/.env.local
+web/.env.*.local
+
+# General
+.DS_Store
+*.swp
+*.swo
+*~
+.env
+.env.local
+
+# IDE
+.idea/
+.vscode/
+*.code-workspace

@@ -1,4 +1,6 @@
 # Rails
+api/config/master.key
+api/config/credentials/*.key
 api/log/*
 api/tmp/*
 api/storage/*
